@@ -37,8 +37,10 @@ The expected report is short:
 ```text
 # Training Metrics
 
+- n_estimators: 100
 - RMSE on the train set: 4.6850
 - RMSE on the test set: 5.0074
+- Rows before filtering: 48326
 - Rows after filtering: 46307
 ```
 

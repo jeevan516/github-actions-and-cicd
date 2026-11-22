@@ -15,6 +15,7 @@ DATA_PATH = Path("data/green_tripdata_2025-01.parquet")
 FEATURES = ["PULocationID", "DOLocationID", "trip_distance"]
 TARGET = "trip_duration_minutes"
 MODEL_NAME = "green-taxi-trip-duration-xgb"
+DEFAULT_N_ESTIMATORS = 100
 
 
 def load_taxi_data():
@@ -44,7 +45,7 @@ def preprocess(df):
     return df[["trip_route", "trip_distance", TARGET]]
 
 
-def train_model(df):
+def train_model(df, n_estimators=DEFAULT_N_ESTIMATORS):
     df_processed = preprocess(df)
     y = df_processed[TARGET]
     X = df_processed.drop(columns=[TARGET])
@@ -58,7 +59,7 @@ def train_model(df):
 
     pipeline = make_pipeline(
         DictVectorizer(),
-        xgb.XGBRegressor(n_estimators=100, random_state=42, n_jobs=-1),
+        xgb.XGBRegressor(n_estimators=n_estimators, random_state=42, n_jobs=-1),
     )
     pipeline.fit(X_train, y_train)
 
@@ -68,6 +69,7 @@ def train_model(df):
     metrics = {
         "rmse_train": root_mean_squared_error(y_train, y_pred_train),
         "rmse_test": root_mean_squared_error(y_test, y_pred_test),
+        "rows_before_filtering": len(df),
         "rows_after_filtering": len(df_processed),
     }
     return pipeline, metrics
@@ -82,17 +84,18 @@ def configure_mlflow():
     mlflow.set_experiment("green-taxi-trip-duration-xgb")
 
 
-def log_model(pipeline, metrics):
+def log_model(pipeline, metrics, params):
     with mlflow.start_run():
         mlflow.set_tags(
             {
                 "model": "xgboost pipeline",
-                "developer": "<your-name>",
+                "developer": "Jeevan D",
                 "dataset": "green-taxi",
                 "features": ",".join(FEATURES),
                 "target": TARGET,
             }
         )
+        mlflow.log_params(params)
         mlflow.log_metrics(metrics)
         mlflow.sklearn.log_model(
             pipeline,
@@ -106,14 +109,16 @@ def log_model(pipeline, metrics):
         )
 
 
-def write_cml_metrics(metrics):
+def write_cml_metrics(metrics, params):
     Path("metrics.txt").write_text(
         "\n".join(
             [
                 "# Training Metrics",
                 "",
+                f"- n_estimators: {params['n_estimators']}",
                 f"- RMSE on the train set: {metrics['rmse_train']:.4f}",
                 f"- RMSE on the test set: {metrics['rmse_test']:.4f}",
+                f"- Rows before filtering: {metrics['rows_before_filtering']}",
                 f"- Rows after filtering: {metrics['rows_after_filtering']}",
                 "",
             ]
@@ -128,16 +133,24 @@ def write_cml_metrics(metrics):
     default=False,
     help="Write metrics.txt for a CML pull request report.",
 )
-def main(cml_run):
+@click.option(
+    "--n-estimators",
+    default=DEFAULT_N_ESTIMATORS,
+    show_default=True,
+    type=click.IntRange(min=1),
+    help="Number of boosting rounds for the XGBoost regressor.",
+)
+def main(cml_run, n_estimators):
     """Train a Green Taxi trip duration model."""
     df = load_taxi_data()
     configure_mlflow()
 
-    pipeline, metrics = train_model(df)
-    log_model(pipeline, metrics)
+    params = {"n_estimators": n_estimators}
+    pipeline, metrics = train_model(df, n_estimators=n_estimators)
+    log_model(pipeline, metrics, params)
 
     if cml_run:
-        write_cml_metrics(metrics)
+        write_cml_metrics(metrics, params)
 
 
 if __name__ == "__main__":

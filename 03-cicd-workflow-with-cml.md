@@ -32,7 +32,8 @@ flowchart TD
 - builds route and distance features,
 - trains a `DictVectorizer` plus `XGBRegressor` pipeline,
 - logs train and test RMSE to MLflow,
-- writes `metrics.txt` when run with `--cml-run`.
+- writes `metrics.txt` when run with `--cml-run`,
+- takes `--n-estimators` (default 100) so you can change the main training parameter without editing code.
 
 Run it locally after downloading the data and configuring MLflow:
 
@@ -47,8 +48,10 @@ The local clean run should produce a `metrics.txt` file shaped like this:
 ```text
 # Training Metrics
 
+- n_estimators: 100
 - RMSE on the train set: 4.6850
 - RMSE on the test set: 5.0074
+- Rows before filtering: 48326
 - Rows after filtering: 46307
 ```
 
@@ -92,6 +95,15 @@ jobs:
           mkdir -p data
           curl -L --fail -o data/green_tripdata_2025-01.parquet \
             https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-01.parquet
+
+      - name: Check data matches DVC metadata
+        # The DVC remote is local, so CI downloads the file instead of running
+        # `dvc pull`, then checks that it is the exact version tracked in Git.
+        run: |
+          expected=$(awk '/md5:/ {print $3}' data/green_tripdata_2025-01.parquet.dvc)
+          actual=$(md5sum data/green_tripdata_2025-01.parquet | cut -d' ' -f1)
+          echo "expected=$expected actual=$actual"
+          test "$expected" = "$actual"
 
       - name: Train model
         env:

@@ -30,6 +30,10 @@ By the end of this repository, you should be able to:
 | --- | --- |
 | [**src/train.py**](src/train.py) | Script that trains the XGBoost model, logs it to MLflow, and writes `metrics.txt`. |
 | [**.github/workflows/cml.yaml**](.github/workflows/cml.yaml) | GitHub Actions workflow that trains the model and comments metrics on pull requests. |
+| [**.github/workflows/test.yaml**](.github/workflows/test.yaml) | GitHub Actions workflow that runs the pytest suite on pull requests. |
+| [**tests**](tests/) | Unit tests for the preprocessing, training, and metrics report code. |
+| [**SOLUTIONS.md**](SOLUTIONS.md) | Completed exercises for lessons 1 to 5 with the real results. |
+| [**data/green_tripdata_2025-01.parquet.dvc**](data/green_tripdata_2025-01.parquet.dvc) | DVC pointer for the taxi data (the Parquet file itself is not in Git). |
 | [**data**](data/) | Local folder for the Green Taxi Parquet file. |
 | [**assets**](assets/) | Visual aids referenced in the repository. |
 | [**pyproject.toml**](pyproject.toml) | Project configuration and dependencies. |
