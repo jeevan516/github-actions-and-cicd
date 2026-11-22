@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir -p data
           curl -L --fail -o data/green_tripdata_2025-01.parquet \
-            https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-01.parquet
+            https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-13.parquet
 
       - name: Check data matches DVC metadata
         # The DVC remote is local, so CI downloads the file instead of running
