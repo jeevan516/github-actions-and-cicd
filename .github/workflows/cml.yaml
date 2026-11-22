@@ -32,6 +32,15 @@ jobs:
           curl -L --fail -o data/green_tripdata_2025-01.parquet \
             https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-01.parquet
 
+      - name: Check data matches DVC metadata
+        # The DVC remote is local, so CI downloads the file instead of running
+        # `dvc pull`, then checks that it is the exact version tracked in Git.
+        run: |
+          expected=$(awk '/md5:/ {print $3}' data/green_tripdata_2025-01.parquet.dvc)
+          actual=$(md5sum data/green_tripdata_2025-01.parquet | cut -d' ' -f1)
+          echo "expected=$expected actual=$actual"
+          test "$expected" = "$actual"
+
       - name: Train model
         env:
           MLFLOW_TRACKING_URI: sqlite:///mlflow.db
