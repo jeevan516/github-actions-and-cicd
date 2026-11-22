@@ -26,6 +26,7 @@ version, and the model's metrics must be visible to reviewers.
    boosting rounds.
 5. **Review** (lesson 5): broke a test and the data URL on purpose, read the failures in
    CI, reverted, and reviewed PR #1 against the merge checklist.
+6. **Protect `main`**: made the repo public and required a review plus both checks.
 
 ## Results
 | What | Result |
@@ -38,15 +39,15 @@ version, and the model's metrics must be visible to reviewers.
 | Data check in CI | md5 `110776612e…` matches the DVC file |
 | Break-and-fix in CI | wrong assertion → `Tests` failed; wrong URL → HTTP 403 in `Download taxi data`; revert → both green |
 | MLflow | 3 runs, 3 registered model versions |
-| Branch protection | not available (private repo on the free plan, API 403) |
+| Branch protection | on (repo made public): PR + 1 approval, checks `test` and `train-and-report` required |
 
 ## Future engineering
 - **Real DVC remote** (S3 or GCS) so CI runs `dvc pull` instead of downloading from the source.
 - **Compare with `main` in the CML comment**: train the base branch too and show the change.
 - **Metric gate**: fail the check if test RMSE gets worse by more than a set amount.
 - **DVC pipeline** (`dvc.yaml`) for preprocessing and training, with `dvc repro`.
-- **Branch protection** once the repo is public or on a paid plan: require both checks and a review.
 
 ## Update log
 - 22 Nov 2026: Completed lessons 1-5 (tests workflow, DVC, CML data check, n_estimators
-  experiment, break-and-fix in CI); PR #1 green with CML comment.
+  experiment, break-and-fix in CI); PR #1 green with CML comment. Repo made public; branch
+  protection on `main` (1 approval, both checks required); deck checked as rendered slides.

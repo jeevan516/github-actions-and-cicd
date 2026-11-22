@@ -15,8 +15,10 @@ this repository's real code:
   and rejecting `--n-estimators 0` and `-1`.
 - **Break and fix:** a commit changed one assertion to `[1, 30, 60, 61]`. The `Tests` check failed
   with `assert [1.0, 30.0, 60.0] == [1, 30, 60, 61]`. A revert commit turned it green again.
-- **Branch protection:** not available. The repository is private on the free plan, and the
-  GitHub API answers `403: Upgrade to GitHub Pro or make this repository public`.
+- **Branch protection:** first blocked, because the repository was private on the free plan
+  (`403: Upgrade to GitHub Pro or make this repository public`). After making the repository
+  public, `main` is protected: a pull request with 1 approval is required, and the status
+  checks `test` and `train-and-report` must pass.
 
 ## Lesson 2: DVC
 
