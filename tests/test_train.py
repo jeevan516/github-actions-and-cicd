@@ -28,7 +28,7 @@ def make_trips(durations_min, distances=None):
 
 def test_trip_duration_keeps_only_1_to_60_minutes():
     df = calculate_trip_duration_in_minutes(make_trips([0.5, 1, 30, 60, 61]))
-    assert df[TARGET].tolist() == [1, 30, 60, 61]
+    assert df[TARGET].tolist() == [1, 30, 60]
 
 
 def test_trip_duration_does_not_mutate_input():
